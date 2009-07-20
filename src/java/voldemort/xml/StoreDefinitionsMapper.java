@@ -69,6 +69,7 @@ public class StoreDefinitionsMapper {
     public final static String STORE_REQUIRED_READS_ELMT = "required-reads";
     public final static String STORE_PREFERRED_READS_ELMT = "preferred-reads";
     public final static String STORE_RETENTION_POLICY_ELMT = "retention-days";
+    public final static String STORE_RETENTION_THROTTLE_RATE_ELMT = "retention-throttle-rate";
     public final static String STORE_ROUTING_STRATEGY = "routing-strategy";
     private final static String STORE_VERSION_ATTR = "version";
 
@@ -157,8 +158,13 @@ public class StoreDefinitionsMapper {
 
         Element retention = store.getChild(STORE_RETENTION_POLICY_ELMT);
         Integer retentionPolicyDays = null;
-        if(retention != null)
+        Integer retentionThrottleRate = null;
+        if(retention != null) {
             retentionPolicyDays = Integer.parseInt(retention.getText());
+            Element throttleRate = store.getChild(STORE_RETENTION_THROTTLE_RATE_ELMT);
+            if(throttleRate != null)
+                retentionThrottleRate = Integer.parseInt(throttleRate.getText());
+        }
 
         return new StoreDefinition(name,
                                    storeType,
@@ -171,7 +177,8 @@ public class StoreDefinitionsMapper {
                                    requiredReads,
                                    preferredWrites,
                                    requiredWrites,
-                                   retentionPolicyDays);
+                                   retentionPolicyDays,
+                                   retentionThrottleRate);
     }
 
     private SerializerDefinition readSerializer(Element elmt) {
@@ -239,6 +246,9 @@ public class StoreDefinitionsMapper {
 
         if(storeDefinition.hasRetentionPeriod())
             store.addContent(new Element(STORE_RETENTION_POLICY_ELMT).setText(Integer.toString(storeDefinition.getRetentionDays())));
+
+        if(storeDefinition.hasRetentionThrottleRate())
+            store.addContent(new Element(STORE_RETENTION_THROTTLE_RATE_ELMT).setText(Integer.toString(storeDefinition.getRetentionThrottleRate())));
 
         return store;
     }
